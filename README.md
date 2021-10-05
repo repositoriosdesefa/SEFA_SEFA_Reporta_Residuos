@@ -3,10 +3,11 @@
 Generación automatizada de oficios sobre las alertas pendientes, extrayendo información directamente del aplicativo
 
 ## Archivos
-Automatizar_RR.R: Código en R para la generación automatizada de oficios
-Bajar y Subir.R: Código en R para extraer información directamente del aplicativo a través de consulta SQL
-Oficio_Alerta.Rmd: Código en RMarkdown con la estructura del oficio automatizado 
-Oficio_Alerta_sc.Rmd: Código en RMarkdown con la estructura del oficio automatizado para la sede central
+- Automatizar_RR.R: Código en R para la generación automatizada de oficios
+- Bajar y Subir.R: Código en R para extraer información directamente del aplicativo a través de consulta SQL
+- Oficio_Alerta.Rmd: Código en RMarkdown con la estructura del oficio automatizado 
+- Oficio_Alerta_sc.Rmd: Código en RMarkdown con la estructura del oficio automatizado para la sede central
+- Carpeta Reporta Resiudos: Con imagenes de los productos finales
 
 ## Observaciones
 
