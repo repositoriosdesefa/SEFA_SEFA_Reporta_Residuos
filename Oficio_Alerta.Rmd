@@ -1,0 +1,193 @@
+---
+params:
+  HT_1: "XXXX-XXX-XXXXXX"
+  N_OFICIO_2: "OFICIO N° XXXX-XXXX-XXXX/XXXX-XXXX"
+  LUGAR_3: "Lima"
+  DESTINATARIO_4: "Alcalde/sa"
+  EFA_5: "MUNICIPALIDAD PROVINCIAL XXXXX"
+  DPTO_EFA_6: "LIMA"
+  PROV_EFA_7: "LIMA"
+  DIR_EFA_8: "Jr. Lima XX, Cercado de Lima"
+  OCI_9:  "MUNICIPALIDAD PROVINCIAL XXXXX"
+  DPTO_OCI_10: "LIMA"
+  PROV_OCI_11: "LIMA"
+  DIR_OCI_12: "Jr. Lima XX, Cercado de Lima"
+  FIRMANTE_13: "[Firma SIGED]"
+  ADICIONAL_14: "2"
+  ADICIONAL_15: "1501"
+  ADICIONAL_16:
+  ADICIONAL_17:
+  ADICIONAL_18:
+always_allow_html: true
+output: 
+  word_document:
+    reference_docx: "plantilla_RR.docx"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# I. Librerías ----
+
+library(lubridate)
+library(readxl)
+library(stringr)
+library(lubridate)
+library(kableExtra)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+# II. Parámetros ----
+HT <- params$HT_1 
+NUM_OFICIO <- params$N_OFICIO_2
+LUGAR <- params$LUGAR_3
+DESTINATARIO <- params$DESTINATARIO_4
+EFA <- params$EFA_5 
+DPTO_EFA <- params$DPTO_EFA_6
+PROV_EFA <- params$PROV_EFA_7
+DIR_EFA <- params$DIR_EFA_8
+FIRMA <- params$FIRMANTE_13
+N_ALERTAS <- params$ADICIONAL_14
+UBIGEO_PROVINCIA <- params$ADICIONAL_15
+
+# Colores
+OEFA.JADE<-c("#44bfb5")
+# Mes y fecha
+Mes_actual <- str_to_lower(month(now(), 
+                                 label=TRUE, abbr = FALSE))
+
+
+# III. Descarga de datos ----
+# Conexión a base de datos de alerta registradas
+REPORTE_RR<- ""
+tp1 <- tempfile() # Creacion de un archivo temporal
+download.file(REPORTE_RR, tp1, mode ="wb")
+REPORTE_A <- as.data.frame(read_xlsx(tp1, sheet = "RR"))
+AUX <- as.data.frame(read_xlsx(tp1, sheet = "AUX"))
+REPORTE_A_D <- merge(REPORTE_A, AUX)
+
+# IV. Procesamiento de datos ----
+TABLA_ALERTAS <- REPORTE_A_D %>%
+  filter(UBIGEO_PROV == UBIGEO_PROVINCIA,
+         DIAS_TRANSCURRIDOS >= 7,
+         ESTADO_ALERTA == "Alerta válida") %>%
+  select(ID_GEN, NOMBRE_LISTA_EFA, FECHA_TOMA,HORA_FOTO,
+         `DISTRITO`,DIAS_TRANSCURRIDOS,`LONGITUD`,`LATITUD`) %>%
+  arrange(DISTRITO,FECHA_TOMA)
+
+Cabeceras <- c("Codigo","Municipalidad","Fecha_de_alerta",
+               "Hora_alerta","Dias","Distrito","Longitud","Latitud")
+
+colnames(TABLA_ALERTAS) <- Cabeceras
+
+
+```
+
+###### `r HT[[1]]`
+
+### `r LUGAR[[1]]`, `r day(now())` de `r Mes_actual[[1]]` de `r year(now())`
+
+# \${numeroDocumento}
+
+### `r DESTINATARIO[[1]]`
+
+## `r EFA[[1]]`
+
+#### [`r PROV_EFA[[1]]`, `r DPTO_EFA[[1]]`]{.ul}.-
+
+|          |     |                                                                                                                                |
+|----------|-----|--------------------------------------------------------------------------------------------------------------------------------|
+| Asunto   | :   | Alertas de acumulación de residuos sólidos recibidas por 'Reporta Residuos' que se encuentran pendientes de atención           |
+| Atención | :   | Área encargada de la fiscalización del manejo y prestación de servicios de limpieza pública en los distritos de su competencia |
+
+De mi mayor consideración:
+
+Tengo el agrado de dirigirme a usted para saludarle cordialmente y, al mismo tiempo, informarle que el Organismo de Evaluación y Fiscalización Ambiental (OEFA) en su calidad de ente rector del Sistema Nacional de Evaluación y Fiscalización Ambiental (Sinefa), **ha tomado conocimiento de la existencia de diversas alertas de acumulación de residuos sólidos registradas en distritos de su jurisdicción a través del Reporta Residuos**[^1]**, que tienen más de siete (7) días de enviadas y que a la fecha se encuentran pendientes de atención**, debido a que la municipalidad distrital correspondiente no ha registrado la evidencia de la acción de limpieza ejecutada.
+
+[^1]: Como es de su conocimiento, la solución tecnológica 'Reporta Residuos' es una herramienta digital que permite a las ciudadanas y ciudadanos de todo el Perú enviar fotos o videos alertando sobre la acumulación de basura en la vía pública, facilitando a las municipalidades la identificación de puntos críticos de residuos sólidos en las ciudades y su posterior erradicación. Para mayor información, los invitamos a acceder a [www.oefa.gob.pe/reportaresiduos](http://www.oefa.gob.pe/reportaresiduos).
+
+Por tal razón, remitimos la siguiente relación de **`r N_ALERTAS[[1]]` alertas pendientes de atención**, a fin de que su despacho, en el marco de sus acciones de fiscalización ambiental del manejo y prestación de los servicios de limpieza pública, supervise a sus municipalidades distritales y se logre la limpieza de los puntos reportados. Se debe precisar que el registro de la evidencia de las acciones de limpieza en el aplicativo es indispensable para visibilizar frente la ciudadanía la labor realizada por la municipalidad correspondiente.
+
+```{r tabla_alerta, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE)
+
+# i) Tabla de alertas
+
+separa <- function(Cod, Muni, Fecha, Hora, Dias, Dist, Long, Lat ){
+  
+  separado <- paste0("|","RR-", Cod,"|", Muni, "|", 
+                     Fecha, " ", Hora, "|", Dias, "|",
+                     Dist, "|", Long, "|", Lat, "|
+                     ")
+ 
+   separado
+}
+
+valores_separados<- function(Cod, Muni, Fecha, Hora, Dias,
+                             Dist, Long, Lat){
+  # Creamos un objeto vacío
+  b=""
+  # Hacemos un loop sobre el número de alertas
+  for (i in 1:N_ALERTAS[1]){
+    b= paste0(b,separa(Cod[i], Muni[i], Fecha[i],
+                       Hora[i], Dias[i],
+                       Dist[i], Long[i], Lat[i]))
+  }
+  
+  b
+}
+
+crea_tabla <- function(Cod, Muni, Fecha, Hora, Dias, Dist, Long, Lat){
+  
+  inicio <- "| **CODIGO** | **MUNICIPALIDAD** | **FECHA/HORA** | **DISTRITO** |  **DIAS SIN ATENCION** | **LONGITUD** | **LATITUD** |
+  |---|---|---|---|---|---|---|
+  "
+  
+  tabla <- paste0(inicio, 
+                  valores_separados(Cod, Muni, Fecha, 
+                                    Hora, Dias, Dist, Long, Lat))
+  
+  tabla
+
+}
+# Crear tabla de alertas para mostrar en oficio
+tabla_alerta <- crea_tabla(TABLA_ALERTAS$Codigo,
+                           TABLA_ALERTAS$Municipalidad,
+                           TABLA_ALERTAS$Fecha_de_alerta,
+                           TABLA_ALERTAS$Hora_alerta,
+                           TABLA_ALERTAS$Dias, 
+                           TABLA_ALERTAS$Distrito,
+                           TABLA_ALERTAS$Longitud, TABLA_ALERTAS$Latitud)
+```
+
+`r tabla_alerta`
+
+En ese sentido, en el marco de lo establecido en el Literal b) del Numeral 11.2 del Artículo 11 de la Ley N° 293251 - Ley del Sistema Nacional de Evaluación y Fiscalización Ambiental, modificada por la Ley N° 30011, se solicita tenga a bien informar, en un plazo máximo de veinte (20) días hábiles, las acciones realizadas por su despacho respecto a cada una de las alertas mencionadas en el cuadro anterior.
+
+Al respecto, les recordamos que 'Reporta Residuos' cuenta con un 'Mapa de alertas en tiempo real' al que pueden acceder desde el aplicativo móvil o el portal [\<https://publico.oefa.gob.pe/Portalpifa/mapasEspecializados.do\>](https://publico.oefa.gob.pe/Portalpifa/mapasEspecializados.do){.uri}, en donde se pueden observar todas las alertas de acumulación de basura enviadas por la ciudadanía cuyo estado se diferencia por colores[^2].
+
+[^2]:  Colores de las alertas y sus significados:
+
+    -   En **color rojo** aquellas que se encuentran pendientes de atención.
+
+    -   En **color verde** aquellas en las que la municipalidad correspondiente sí se ha registrado la foto que evidencia la acción de limpieza realizada.
+
+En caso tenga alguna consulta o desee realizar alguna coordinación, agradeceremos comunicarse al correo electrónico [reportaresiduos\@oefa.gob.pe](mailto:reportaresiduos@oefa.gob.pe){.email}.
+
+Sin otro en particular, hago propicia la ocasión para reiterarle los sentimientos de mi especial consideración.
+
+Atentamente,
+
+|     |     |     |
+|-----|-----|-----|
+|     |     |     |
+|     |     |     |
+|     |     |     |
+|     |     |     |
+|     |     |     |
+|     |     |     |
+|     |     |     |
+|     |     |     |
+
+**`r FIRMA[[1]]`**
